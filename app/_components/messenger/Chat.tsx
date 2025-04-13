@@ -139,6 +139,21 @@ const fakeChat = {
       timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
     },
     {
+      sender: 9876543,
+      message: "That's great! Can you send me the details?",
+      timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
+    },
+    {
+      sender: 9876543,
+      message: "That's great! Can you send me the details?",
+      timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
+    },
+    {
+      sender: 9876543,
+      message: "That's great! Can you send me the details?",
+      timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
+    },
+    {
       sender: 8765432,
       message: "Sure, I'll email you the documentation later today.",
       timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
@@ -168,22 +183,35 @@ function Chat({ active }: { active: number }) {
           type='text'
         />
         <div className='flex h-full w-full flex-col-reverse overflow-y-scroll'>
-          {fakeChat.messages.map((message, i) => (
-            <div
-              className={` ${message.sender === myId ? 'bg-custom-green self-end' : 'self-start bg-zinc-700/20'} ${
-                fakeChat.messages[i + 1]?.sender === message.sender
-                  ? 'rounded-t-none border-t-1 border-black'
-                  : 'rounded-2xl'
-              } ${
-                fakeChat.messages[i - 1]?.sender === message.sender
-                  ? 'rounded-b-none'
-                  : 'rounded-2xl'
-              } p-2 text-white`}
-              key={i + message.message}
-            >
-              {message.message}
-            </div>
-          ))}
+          {fakeChat.messages.map((message, i) => {
+            const prevSender = fakeChat.messages[i - 1]?.sender;
+            const nextSender = fakeChat.messages[i + 1]?.sender;
+            const isMine = message.sender === myId;
+
+            const baseClasses = `
+    ${isMine ? 'bg-custom-green self-end' : 'bg-zinc-700/20 self-start'}
+    p-2 text-white
+    rounded-tl-2xl rounded-bl-2xl
+  `;
+
+            const topRadius =
+              prevSender !== message.sender ? 'rounded-br-2xl' : '';
+            const bottomRadius =
+              nextSender !== message.sender ? 'rounded-tr-2xl' : '';
+            const middle =
+              prevSender === message.sender && nextSender === message.sender
+                ? 'rounded-r-sm'
+                : '';
+
+            return (
+              <div
+                key={i + message.message}
+                className={`${baseClasses} ${topRadius} ${bottomRadius} ${middle} m-[1px]`}
+              >
+                {message.message}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
