@@ -158,7 +158,7 @@ const fakeChat = {
 function Chat({ active }: { active: number }) {
   return (
     <div className='bg-custom-gray col-start-9 col-end-25 hidden overflow-hidden rounded-xl p-5 md:block lg:col-start-8'>
-      <div className='text-custom-green fixed z-20 rounded-2xl bg-zinc-700/50 p-2 font-bold'>
+      <div className='text-custom-green fixed z-20 rounded-2xl bg-zinc-900 p-2 font-bold'>
         Chat with Jozko Pobehly
       </div>
       <div className='flex h-full w-full flex-col-reverse'>
@@ -170,7 +170,15 @@ function Chat({ active }: { active: number }) {
         <div className='flex h-full w-full flex-col-reverse overflow-y-scroll'>
           {fakeChat.messages.map((message, i) => (
             <div
-              className={`${message.sender === myId ? 'bg-custom-green self-end' : 'self-start bg-zinc-700/20'} rounded-2xl p-2 text-white`}
+              className={` ${message.sender === myId ? 'bg-custom-green self-end' : 'self-start bg-zinc-700/20'} ${
+                fakeChat.messages[i + 1]?.sender === message.sender
+                  ? 'rounded-t-none border-t-1 border-black'
+                  : 'rounded-2xl'
+              } ${
+                fakeChat.messages[i - 1]?.sender === message.sender
+                  ? 'rounded-b-none'
+                  : 'rounded-2xl'
+              } p-2 text-white`}
               key={i + message.message}
             >
               {message.message}
