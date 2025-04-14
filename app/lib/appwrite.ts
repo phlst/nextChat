@@ -1,8 +1,9 @@
 'use server';
 
-import { Account, Client } from 'node-appwrite';
-
+import { Account, Client, ID } from 'node-appwrite';
 import { cookies } from 'next/headers';
+
+import { redirect } from 'next/navigation'; // Changed this import
 
 export async function createSessionClient() {
   const client = new Client()
@@ -43,4 +44,25 @@ export async function getLoggedInUser() {
   } catch (error) {
     return error;
   }
+}
+
+export async function signUpWithEmail(formData: FormData) {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const name = formData.get('name') as string;
+
+  const { account } = await createAdminClient();
+
+  await account.create(ID.unique(), email, password, name);
+  const session = await account.createEmailPasswordSession(email, password);
+
+  const cookieStore = await cookies();
+
+  cookieStore.set('session', session.secret, {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: true,
+  });
+  redirect('/messenger');
 }
