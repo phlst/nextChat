@@ -131,7 +131,7 @@ function Sidebar({
       </div>
 
       <div className='bg-custom-gray col-start-1 col-end-25 overflow-hidden rounded-xl border-1 md:col-start-2 md:col-end-9 md:mr-8 lg:col-end-8'>
-        <div className='n h-full max-h-full w-full overflow-y-scroll p-4 text-white'>
+        <div className='n scrollbar scrollbar-thumb-custom-black scrollbar-track-custom-gray h-full max-h-full w-full overflow-y-scroll p-4 text-white'>
           <h1 className='text-3xl'>Chat&apos;s</h1>
 
           {fakeData.map((friend, i) => (

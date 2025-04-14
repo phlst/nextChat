@@ -50,7 +50,7 @@ const fakeChat = {
     },
     {
       sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
+      message: "Sure, I'll email .",
       timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
     },
     {
@@ -150,7 +150,7 @@ const fakeChat = {
     },
     {
       sender: 9876543,
-      message: "That's great! Can you send me the details?",
+      message: "That's great! Can you send me th?",
       timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
     },
     {
@@ -182,26 +182,39 @@ function Chat({ active }: { active: number }) {
           placeholder='Aa'
           type='text'
         />
-        <div className='flex h-full w-full flex-col-reverse overflow-y-scroll'>
+        <div className='scrollbar scrollbar-thumb-custom-black scrollbar-track-custom-gray flex h-full w-full flex-col-reverse overflow-y-scroll'>
           {fakeChat.messages.map((message, i) => {
             const prevSender = fakeChat.messages[i - 1]?.sender;
             const nextSender = fakeChat.messages[i + 1]?.sender;
             const isMine = message.sender === myId;
 
             const baseClasses = `
-    ${isMine ? 'bg-custom-green self-end' : 'bg-zinc-700/20 self-start'}
+    ${isMine ? 'bg-custom-green self-end rounded-tl-2xl rounded-bl-2xl' : 'bg-zinc-700/20 self-start rounded-tr-2xl rounded-br-2xl'}
     p-2 text-white
-    rounded-tl-2xl rounded-bl-2xl
+    
   `;
 
-            const topRadius =
-              prevSender !== message.sender ? 'rounded-br-2xl' : '';
-            const bottomRadius =
-              nextSender !== message.sender ? 'rounded-tr-2xl' : '';
-            const middle =
-              prevSender === message.sender && nextSender === message.sender
-                ? 'rounded-r-sm'
-                : '';
+            let topRadius = '';
+            let bottomRadius = '';
+            let middle = '';
+
+            if (isMine) {
+              topRadius = prevSender !== message.sender ? 'rounded-br-2xl' : '';
+              bottomRadius =
+                nextSender !== message.sender ? 'rounded-tr-2xl' : '';
+              middle =
+                prevSender === message.sender && nextSender === message.sender
+                  ? 'rounded-r-sm'
+                  : '';
+            } else {
+              topRadius = prevSender !== message.sender ? 'rounded-bl-2xl' : '';
+              bottomRadius =
+                nextSender !== message.sender ? 'rounded-tl-2xl' : '';
+              middle =
+                prevSender === message.sender && nextSender === message.sender
+                  ? 'rounded-l-sm'
+                  : '';
+            }
 
             return (
               <div

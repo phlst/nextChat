@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@plugin 'tailwind-scrollbar';
 
 :root {
   --custom-black: #0a0a0a;
