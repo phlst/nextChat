@@ -170,7 +170,7 @@ const fakeChat = {
     },
   ],
 };
-function Chat({ active }: { active: number }) {
+function Chat() {
   return (
     <div className='bg-custom-gray col-start-9 col-end-25 hidden overflow-hidden rounded-xl p-5 md:block lg:col-start-8'>
       <div className='text-custom-green fixed z-20 rounded-2xl bg-zinc-900 p-2 font-bold'>
