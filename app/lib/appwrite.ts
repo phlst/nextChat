@@ -3,7 +3,7 @@
 import { Account, Client, ID } from 'node-appwrite';
 import { cookies } from 'next/headers';
 
-import { redirect } from 'next/navigation'; // Changed this import
+import { redirect } from 'next/navigation';
 
 export async function createSessionClient() {
   const client = new Client()

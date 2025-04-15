@@ -1,5 +1,5 @@
 'use client';
-import Image from 'next/image';
+
 import Link from 'next/link';
 import { FormEvent, useRef } from 'react';
 import { logInWithEmail } from './lib/appwrite';
@@ -54,36 +54,10 @@ export default function Home() {
             Login
           </button>
         </form>
-        <div className='flex h-[50%] w-[60%] flex-col items-center'>
-          <p className='mt-5 mb-2 text-lg'>Or log in with:</p>
-          <div className='bg-custom-gray mb-3 h-1 w-[60%]'></div>
-          <div className='mb-3 flex h-12 w-full cursor-pointer content-center justify-center rounded-xl border-1 bg-amber-50 transition-colors hover:bg-amber-100'>
-            <Image
-              src='/google.svg'
-              alt='google login'
-              height={40}
-              width={40}
-            />
-          </div>
-          <div className='flex h-12 w-full cursor-pointer items-center justify-center rounded-xl border-1 bg-amber-50 transition-colors hover:bg-amber-100'>
-            <Image
-              src='/github.svg'
-              alt='github login'
-              height={40}
-              width={40}
-            />
-          </div>
-
-          <p className='mt-5 text-sm'>
-            Don&apos;t have an account?
-            <Link
-              href='/register'
-              className='text-custom-green hover:underline'
-            >
-              Sign up here
-            </Link>
-          </p>
-        </div>
+        <h1 className='pt-6 text-white'>Don&apos;t have a account ? </h1>
+        <Link className='text-custom-green' href='/register'>
+          Register
+        </Link>
       </div>
     </div>
   );

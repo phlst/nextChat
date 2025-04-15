@@ -1,5 +1,4 @@
 'use client';
-import Image from 'next/image';
 import Link from 'next/link';
 import { signUpWithEmail } from '../lib/appwrite';
 import { FormEvent, useRef } from 'react';
@@ -75,35 +74,10 @@ function Page() {
             Create Account
           </button>
         </form>
-
-        {/* Rest of your component stays the same */}
-        <div className='flex h-[40%] w-[60%] flex-col items-center'>
-          <p className='mt-3 mb-2 text-lg'>Or sign up with:</p>
-          <div className='bg-custom-gray mb-3 h-1 w-[60%]'></div>
-          <div className='mb-3 flex h-12 w-full cursor-pointer content-center justify-center rounded-xl border-1 bg-amber-50 transition-colors hover:bg-amber-100'>
-            <Image
-              src='/google.svg'
-              alt='google signup'
-              height={40}
-              width={40}
-            />
-          </div>
-          <div className='flex h-12 w-full cursor-pointer items-center justify-center rounded-xl border-1 bg-amber-50 transition-colors hover:bg-amber-100'>
-            <Image
-              src='/github.svg'
-              alt='github signup'
-              height={40}
-              width={40}
-            />
-          </div>
-
-          <p className='mt-5 text-sm'>
-            Already have an account?{' '}
-            <Link href='/' className='text-custom-green hover:underline'>
-              Log in here
-            </Link>
-          </p>
-        </div>
+        <h1 className='pt-6 text-white'>Already have a account ? </h1>
+        <Link className='text-custom-green' href='/'>
+          Log in
+        </Link>
       </div>
     </div>
   );
