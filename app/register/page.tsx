@@ -23,7 +23,6 @@ function Page() {
 
     try {
       await signUpWithEmail(formData);
-      // Redirect or show success message
     } catch (error) {
       console.error('Error signing up:', error);
       alert(error instanceof Error ? error.message : 'Failed to sign up');

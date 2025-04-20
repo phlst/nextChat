@@ -1,6 +1,6 @@
 'use server';
 
-import { Account, Client, ID } from 'node-appwrite';
+import { Account, Client, Databases, ID } from 'node-appwrite';
 import { cookies } from 'next/headers';
 
 import { redirect } from 'next/navigation';
@@ -34,6 +34,9 @@ export async function createAdminClient() {
     get account() {
       return new Account(client);
     },
+    get database() {
+      return new Databases(client);
+    },
   };
 }
 
@@ -51,10 +54,15 @@ export async function signUpWithEmail(formData: FormData) {
   const password = formData.get('password') as string;
   const name = formData.get('name') as string;
 
-  const { account } = await createAdminClient();
+  const { account, database } = await createAdminClient();
 
-  await account.create(ID.unique(), email, password, name);
+  const user = await account.create(ID.unique(), email, password, name);
   const session = await account.createEmailPasswordSession(email, password);
+
+  database.createDocument('messenger', 'users', user.$id, {
+    name: name,
+    email: email,
+  });
 
   const cookieStore = await cookies();
 
