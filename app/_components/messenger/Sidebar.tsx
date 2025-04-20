@@ -6,7 +6,7 @@ import {
 } from '@heroicons/react/16/solid';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useRef, useState } from 'react';
 
 const initial = [
   {
@@ -15,6 +15,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: true,
   },
   {
     index: 2,
@@ -22,6 +23,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: true,
   },
   {
     index: 3,
@@ -29,6 +31,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: true,
   },
   {
     index: 4,
@@ -36,6 +39,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: true,
   },
   {
     index: 5,
@@ -43,6 +47,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: false,
   },
   {
     index: 6,
@@ -50,6 +55,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: false,
   },
   {
     index: 7,
@@ -57,6 +63,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: false,
   },
   {
     index: 8,
@@ -64,6 +71,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: false,
   },
   {
     index: 9,
@@ -71,6 +79,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: true,
   },
   {
     index: 10,
@@ -78,6 +87,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: true,
   },
   {
     index: 11,
@@ -85,6 +95,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: true,
   },
   {
     index: 11,
@@ -92,6 +103,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: true,
   },
   {
     index: 12,
@@ -99,6 +111,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: true,
   },
   {
     index: 13,
@@ -106,6 +119,7 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: true,
   },
   {
     index: 14,
@@ -113,9 +127,9 @@ const initial = [
     last_text: 'How are you my brother ?',
     image_url:
       'https://cloud.appwrite.io/v1/storage/buckets/67fa6ff400122e19ff94/files/anonymousImage/view?project=67fa6fdf00351ccdec37&mode=admin',
+    isFriend: true,
   },
 ];
-
 function Sidebar({
   active,
   setActive,
@@ -129,11 +143,29 @@ function Sidebar({
 
   const [fakeData, setFakeData] = useState(initial);
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [selectedPosition, setSelectedPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+  const [selectedFriend, setSelectedFriend] = useState<number | null>(null);
   const filteredData = fakeData.filter((friend) =>
     friend.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
-
+  const friendRef = useRef<HTMLDivElement>(null);
+  function friendRequest(index: number, ref: HTMLDivElement | null) {
+    if (index !== selectedFriend) {
+      setSelectedFriend(index);
+      if (ref) {
+        const rect = ref.getBoundingClientRect();
+        setSelectedPosition({
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
+        });
+      }
+    } else {
+      setSelectedFriend(null);
+    }
+  }
   function handleClick(index: number) {
     const params = new URLSearchParams(searchParams);
     setActive(index);
@@ -171,9 +203,18 @@ function Sidebar({
             <div
               className={`my-4 ${
                 active === friend.index ? 'bg-amber-50/10' : ''
-              } flex rounded-2xl hover:bg-amber-50/10`}
+              } relative flex rounded-2xl hover:bg-amber-50/10`}
               key={i + friend.name}
-              onClick={() => handleClick(friend.index)}
+              onClick={
+                friend.isFriend
+                  ? () => handleClick(friend.index)
+                  : (e) =>
+                      friendRequest(
+                        friend.index,
+                        e.currentTarget as HTMLDivElement,
+                      )
+              }
+              ref={friendRef}
             >
               <Image
                 src={friend.image_url}
@@ -190,6 +231,20 @@ function Sidebar({
             </div>
           ))}
         </div>
+        {selectedFriend !== null &&
+          !filteredData.find((f) => f.index === selectedFriend)?.isFriend && (
+            <div
+              className='absolute mt-4 flex justify-center'
+              style={{
+                top: selectedPosition.top,
+                left: selectedPosition.left,
+              }}
+            >
+              <button className='rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600'>
+                Add Friend
+              </button>
+            </div>
+          )}
       </div>
     </>
   );
