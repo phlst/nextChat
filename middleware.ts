@@ -8,7 +8,6 @@ export async function middleware(request: NextRequest) {
   try {
     const { account } = await createSessionClient();
     const user = await account.get();
-
     if (user) {
       if (pathname === '/' || pathname === '/register') {
         return NextResponse.redirect(new URL('/messenger', request.url));

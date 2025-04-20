@@ -23,6 +23,36 @@ export async function createSessionClient() {
     },
   };
 }
+export async function getUserById(userId: string) {
+  const client = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
+  const databases = new Databases(client);
+  const data = databases.getDocument('messenger', 'users', userId);
+  return data;
+}
+export async function getSessionUser() {
+  const client = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
+  const cookieStore = await cookies();
+  const session = cookieStore.get('session');
+  if (!session || !session.value) {
+    throw new Error('No session');
+  }
+
+  client.setSession(session.value);
+  const account = new Account(client);
+
+  try {
+    const user = await account.get();
+    console.log(user);
+    return user;
+  } catch (error) {
+    console.error('Error fetching account:', error);
+    throw error;
+  }
+}
 
 export async function createAdminClient() {
   const client = new Client()

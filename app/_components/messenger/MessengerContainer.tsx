@@ -1,0 +1,34 @@
+'use client';
+import { getSessionUser, getUserById } from '@/app/lib/appwrite';
+import { setUser } from '@/app/lib/user';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import Sidebar from './Sidebar';
+import Chat from './Chat';
+
+export default function MessengerContainer() {
+  const [active, setActive] = useState(1);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getSessionUser();
+        const userData = await getUserById(data.$id);
+        console.log(userData);
+        dispatch(setUser(userData));
+      } catch (error) {
+        console.error('Error fetching session user:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    <div className='grid-row-2 grid h-screen w-screen grid-cols-24 py-8 pr-8 pl-8 md:pl-0'>
+      <Sidebar active={active} setActive={setActive} />
+      <Chat />
+    </div>
+  );
+}

@@ -4,40 +4,38 @@ type User = {
   $id: string;
   name: string;
   email: string;
-};
-
-type InitialState = {
+  avatar_url: string;
   isAuthenticated: boolean;
-  user: User | null;
-  loading: boolean;
 };
 
-const initialState: InitialState = {
+const initialState: User = {
+  $id: '',
+  name: '',
+  email: '',
+  avatar_url: '',
   isAuthenticated: false,
-  user: null,
-  loading: true,
 };
-
 export const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<User>) => {
       state.isAuthenticated = true;
-      state.user = action.payload;
-      state.loading = false;
+      state.name = action.payload.name;
+      state.email = action.payload.email;
+      state.avatar_url = action.payload.avatar_url;
+      state.$id = action.payload.$id;
     },
     clearUser: (state) => {
+      state.name = '';
+      state.$id = '';
       state.isAuthenticated = false;
-      state.user = null;
-      state.loading = false;
-    },
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
+      state.avatar_url = '';
+      state.email = '';
     },
   },
 });
 
-export const { setUser, clearUser, setLoading } = userSlice.actions;
+export const { setUser, clearUser } = userSlice.actions;
 
 export default userSlice.reducer;
