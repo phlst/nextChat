@@ -1,5 +1,3 @@
-import { useSearchParams } from 'next/navigation';
-
 const myId = 8765432;
 
 const fakeChat = {
@@ -173,9 +171,6 @@ const fakeChat = {
   ],
 };
 function Chat() {
-  const searchParams = useSearchParams();
-  const search = searchParams.get('chat');
-  console.log(search);
   return (
     <div className='bg-custom-gray col-start-9 col-end-25 hidden overflow-hidden rounded-xl p-5 md:block lg:col-start-8'>
       <div className='text-custom-green fixed z-20 rounded-2xl bg-zinc-900 p-2 font-bold'>
