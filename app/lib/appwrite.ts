@@ -1,6 +1,6 @@
 'use server';
 
-import { Account, Client, Databases, ID } from 'node-appwrite';
+import { Account, Client, Databases, ID, Query } from 'node-appwrite';
 import { cookies } from 'next/headers';
 
 import { redirect } from 'next/navigation';
@@ -23,12 +23,51 @@ export async function createSessionClient() {
     },
   };
 }
+export async function getMyFriends(friends: string[]) {
+  const client = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
+  const databases = new Databases(client);
+  if (friends.length == 0) {
+    return;
+  }
+  const myFriends = await databases.listDocuments('messenger', 'users', [
+    Query.equal('$id', friends),
+    Query.select(['$id', 'name', 'avatar_url']),
+  ]);
+  const data: Friend[] = myFriends.documents.map((doc) => ({
+    $id: doc.$id,
+    name: doc.name,
+    avatar_url: doc.avatar_url,
+  }));
+  return data;
+}
+export async function findUsers(value: string) {
+  const client = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
+  const databases = new Databases(client);
+  const users = await databases.listDocuments('messenger', 'users', [
+    Query.contains('name', value),
+  ]);
+  const filteredData = users.documents;
+  return filteredData;
+}
 export async function getUserById(userId: string) {
   const client = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
   const databases = new Databases(client);
-  const data = databases.getDocument('messenger', 'users', userId);
+  const document = await databases.getDocument('messenger', 'users', userId);
+
+  // Type assertion to tell TypeScript that the document has the properties of a User
+  const data: User = {
+    $id: document.$id,
+    name: document.name,
+    email: document.email,
+    avatar_url: document.avatar_url,
+    friends: document.friends,
+  };
   return data;
 }
 export async function getSessionUser() {

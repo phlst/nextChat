@@ -7,7 +7,7 @@ import Sidebar from './Sidebar';
 import Chat from './Chat';
 
 export default function MessengerContainer() {
-  const [active, setActive] = useState(1);
+  const [active, setActive] = useState('');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function MessengerContainer() {
     };
 
     fetchData();
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className='grid-row-2 grid h-screen w-screen grid-cols-24 py-8 pr-8 pl-8 md:pl-0'>
