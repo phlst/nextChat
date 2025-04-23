@@ -23,6 +23,30 @@ export async function createSessionClient() {
     },
   };
 }
+export async function sendFriendRequest({
+  sender,
+  receiver,
+}: {
+  sender: string;
+  receiver: string;
+}): Promise<boolean> {
+  const client = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
+  const databases = new Databases(client);
+
+  try {
+    await databases.createDocument('messenger', 'friend_request', ID.unique(), {
+      sender_id: sender,
+      receiver_id: receiver,
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Failed to send friend request:', error);
+    return false;
+  }
+}
 export async function getMyFriends(friends: string[]) {
   const client = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
@@ -49,9 +73,16 @@ export async function findUsers(value: string) {
   const databases = new Databases(client);
   const users = await databases.listDocuments('messenger', 'users', [
     Query.contains('name', value),
+
+    Query.select(['$id', 'name', 'avatar_url']),
   ]);
-  const filteredData = users.documents;
-  return filteredData;
+
+  const data: Friend[] = users.documents.map((doc) => ({
+    $id: doc.$id,
+    name: doc.name,
+    avatar_url: doc.avatar_url,
+  }));
+  return data;
 }
 export async function getUserById(userId: string) {
   const client = new Client()

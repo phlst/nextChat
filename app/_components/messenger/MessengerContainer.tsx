@@ -15,7 +15,7 @@ export default function MessengerContainer() {
       try {
         const data = await getSessionUser();
         const userData = await getUserById(data.$id);
-        console.log(userData);
+
         dispatch(setUser(userData));
       } catch (error) {
         console.error('Error fetching session user:', error);
@@ -26,7 +26,7 @@ export default function MessengerContainer() {
   }, [dispatch]);
 
   return (
-    <div className='grid-row-2 grid h-screen w-screen grid-cols-24 py-8 pr-8 pl-8 md:pl-0'>
+    <div className='grid h-screen w-screen grid-cols-24 py-8 pr-8 pl-8 md:pl-0'>
       <Sidebar active={active} setActive={setActive} />
       <Chat />
     </div>

@@ -26,8 +26,17 @@ function Sidebar({
   const friends = useSelector((state: RootState) => state.user.friends);
 
   async function searchUsers(value: string) {
-    const data = await findUsers(value);
-    console.log(data);
+    if (value === '') {
+      async function fetchFriends() {
+        const data = await getMyFriends(friends);
+        setMyFriends(data);
+      }
+
+      fetchFriends();
+    } else {
+      const data = await findUsers(value);
+      setMyFriends(data);
+    }
   }
 
   function handleFriendClick(index: string) {
@@ -44,7 +53,6 @@ function Sidebar({
   useEffect(() => {
     async function fetchFriends() {
       const data = await getMyFriends(friends);
-      console.log(data);
       setMyFriends(data);
     }
 
