@@ -1,15 +1,17 @@
 'use client';
-import { findUsers, getMyFriends } from '@/app/lib/appwrite';
+import { getRequest, findUsers, getMyFriends } from '@/app/lib/appwrite';
 import { RootState } from '@/app/lib/store';
 import {
   BuildingStorefrontIcon,
   ChatBubbleOvalLeftIcon,
   Cog6ToothIcon,
+  BellIcon,
 } from '@heroicons/react/16/solid';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import FriendRequest from './FriendRequest';
 
 function Sidebar({
   active,
@@ -21,10 +23,21 @@ function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
 
-  const avatar = useSelector((state: RootState) => state.user.avatar_url);
   const [myFriends, setMyFriends] = useState<Friend[]>();
+  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const avatar = useSelector((state: RootState) => state.user.avatar_url);
+  const myId = useSelector((state: RootState) => state.user.$id);
   const friends = useSelector((state: RootState) => state.user.friends);
 
+  useEffect(() => {
+    async function getFriendRequest() {
+      const request = await getRequest(myId);
+      setFriendRequests(request);
+    }
+    getFriendRequest();
+  }, [myId]);
   async function searchUsers(value: string) {
     if (value === '') {
       async function fetchFriends() {
@@ -60,6 +73,9 @@ function Sidebar({
   }, [friends]);
   return (
     <>
+      {isOpen ? (
+        <FriendRequest onClick={() => setIsOpen((state) => !state)} />
+      ) : null}
       <div className='col-start-1 col-end-2 hidden flex-col items-center justify-between md:flex'>
         <div>
           <span className='flex h-9 w-9 items-center justify-center transition-all hover:scale-120'>
@@ -71,6 +87,14 @@ function Sidebar({
           </span>
         </div>
         <div>
+          {friendRequests?.length !== 0 ? (
+            <span
+              onClick={() => setIsOpen((state) => !state)}
+              className='mb-2 flex h-9 w-9 animate-bounce items-center justify-center transition-all hover:scale-120'
+            >
+              <BellIcon className='fill-custom-green h-8 w-8' />
+            </span>
+          ) : null}
           <div className='relative mb-4 inline-block h-9 w-9 transition-all duration-150 hover:scale-120'>
             <Image
               src={

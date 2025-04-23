@@ -11,6 +11,11 @@ declare global {
     name: string;
     avatar_url: string;
   };
+  type FriendRequest = {
+    sender_id: string;
+    receiver_id: string;
+    status: 'send' | 'accepted' | 'rejected';
+  };
 }
 
 export {};

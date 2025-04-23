@@ -47,6 +47,21 @@ export async function sendFriendRequest({
     return false;
   }
 }
+export async function getRequest(id: string) {
+  const client = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
+  const databases = new Databases(client);
+  const result = await databases.listDocuments('messenger', 'friend_request', [
+    Query.equal('receiver_id', id),
+  ]);
+  const filtered: FriendRequest[] = result.documents.map((doc) => ({
+    sender_id: doc.sender_id,
+    receiver_id: doc.receiver_id,
+    status: doc.status,
+  }));
+  return filtered;
+}
 export async function getMyFriends(friends: string[]) {
   const client = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
@@ -91,7 +106,6 @@ export async function getUserById(userId: string) {
   const databases = new Databases(client);
   const document = await databases.getDocument('messenger', 'users', userId);
 
-  // Type assertion to tell TypeScript that the document has the properties of a User
   const data: User = {
     $id: document.$id,
     name: document.name,
@@ -116,7 +130,6 @@ export async function getSessionUser() {
 
   try {
     const user = await account.get();
-    console.log(user);
     return user;
   } catch (error) {
     console.error('Error fetching account:', error);
