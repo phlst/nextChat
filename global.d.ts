@@ -11,11 +11,19 @@ declare global {
     name: string;
     avatar_url: string;
   };
+
   type FriendRequest = {
+    $id: string,
     sender_id: string;
     receiver_id: string;
     status: 'send' | 'accepted' | 'rejected';
   };
+  type RequestFriendData = {
+    $id: string,
+    name: string,
+    avatar_url: string,
+    requestId: string,
+  }
 }
 
-export {};
+export { };

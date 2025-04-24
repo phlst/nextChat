@@ -74,7 +74,7 @@ function Sidebar({
   return (
     <>
       {isOpen ? (
-        <FriendRequest onClick={() => setIsOpen((state) => !state)} />
+        <FriendRequest requests={friendRequests} onClick={() => setIsOpen((state) => !state)} />
       ) : null}
       <div className='col-start-1 col-end-2 hidden flex-col items-center justify-between md:flex'>
         <div>
@@ -123,25 +123,24 @@ function Sidebar({
           />
           {myFriends?.length !== 0 && myFriends
             ? myFriends.map((friend) => (
-                <div
-                  key={friend.$id + friend.name}
-                  className={`relative my-4 ${
-                    active === friend.$id ? 'bg-amber-50/10' : ''
+              <div
+                key={friend.$id + friend.name}
+                className={`relative my-4 ${active === friend.$id ? 'bg-amber-50/10' : ''
                   } flex items-center rounded-2xl hover:bg-amber-50/10`}
-                  onClick={() => handleFriendClick(friend.$id)}
-                >
-                  <Image
-                    src={friend.avatar_url}
-                    alt={`Image of ${friend.name}`}
-                    width={40}
-                    height={40}
-                    className='m-2 inline rounded-full'
-                  />
-                  <div className='flex flex-col justify-center'>
-                    <span className='font-bold'>{friend.name}</span>
-                  </div>
+                onClick={() => handleFriendClick(friend.$id)}
+              >
+                <Image
+                  src={friend.avatar_url}
+                  alt={`Image of ${friend.name}`}
+                  width={40}
+                  height={40}
+                  className='m-2 inline rounded-full'
+                />
+                <div className='flex flex-col justify-center'>
+                  <span className='font-bold'>{friend.name}</span>
                 </div>
-              ))
+              </div>
+            ))
             : null}
         </div>
       </div>
