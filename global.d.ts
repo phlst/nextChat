@@ -16,7 +16,6 @@ declare global {
     $id: string,
     sender_id: string;
     receiver_id: string;
-    status: 'send' | 'accepted' | 'rejected';
   };
   type RequestFriendData = {
     $id: string,

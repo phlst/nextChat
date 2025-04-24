@@ -100,7 +100,6 @@ export async function getRequestData(id: string) {
   const filtered: FriendRequest = {
     sender_id: result.sender_id,
     receiver_id: result.receiver_id,
-    status: result.status,
     $id: result.$id,
   };
   return filtered;
