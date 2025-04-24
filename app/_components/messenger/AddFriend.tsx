@@ -1,3 +1,4 @@
+'use client';
 import { getUserById, sendFriendRequest } from '@/app/lib/appwrite';
 import { RootState } from '@/app/lib/store';
 import Image from 'next/image';

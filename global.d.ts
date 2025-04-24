@@ -13,16 +13,26 @@ declare global {
   };
 
   type FriendRequest = {
-    $id: string,
+    $id: string;
     sender_id: string;
     receiver_id: string;
   };
   type RequestFriendData = {
-    $id: string,
-    name: string,
-    avatar_url: string,
-    requestId: string,
-  }
+    $id: string;
+    name: string;
+    avatar_url: string;
+    requestId: string;
+  };
+  type Message = {
+    senderId: string;
+    message: string;
+    timeSend: string;
+  };
+  type Chat = {
+    friends: string[];
+    messages: string[];
+    $id: string;
+  };
 }
 
-export { };
+export {};

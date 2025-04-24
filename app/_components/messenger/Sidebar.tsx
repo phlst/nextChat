@@ -1,5 +1,10 @@
 'use client';
-import { getRequest, findUsers, getMyFriends } from '@/app/lib/appwrite';
+import {
+  getRequest,
+  findUsers,
+  getMyFriends,
+  generateHexChatId,
+} from '@/app/lib/appwrite';
 import { RootState } from '@/app/lib/store';
 import {
   BuildingStorefrontIcon,
@@ -52,14 +57,15 @@ function Sidebar({
     }
   }
 
-  function handleFriendClick(index: string) {
+  async function handleFriendClick(index: string) {
     const params = new URLSearchParams();
     setActive(index);
     if (!friends.includes(index)) {
       params.set('add', index.toString());
       router.push(`${pathname}?${params.toString()}`);
     } else {
-      params.set('chat', index.toString());
+      const chatParams = await generateHexChatId(myId, index.toString());
+      params.set('chat', chatParams);
       router.push(`${pathname}?${params.toString()}`);
     }
   }
@@ -74,7 +80,10 @@ function Sidebar({
   return (
     <>
       {isOpen ? (
-        <FriendRequest requests={friendRequests} onClick={() => setIsOpen((state) => !state)} />
+        <FriendRequest
+          requests={friendRequests}
+          onClick={() => setIsOpen((state) => !state)}
+        />
       ) : null}
       <div className='col-start-1 col-end-2 hidden flex-col items-center justify-between md:flex'>
         <div>
@@ -123,24 +132,25 @@ function Sidebar({
           />
           {myFriends?.length !== 0 && myFriends
             ? myFriends.map((friend) => (
-              <div
-                key={friend.$id + friend.name}
-                className={`relative my-4 ${active === friend.$id ? 'bg-amber-50/10' : ''
+                <div
+                  key={friend.$id + friend.name}
+                  className={`relative my-4 ${
+                    active === friend.$id ? 'bg-amber-50/10' : ''
                   } flex items-center rounded-2xl hover:bg-amber-50/10`}
-                onClick={() => handleFriendClick(friend.$id)}
-              >
-                <Image
-                  src={friend.avatar_url}
-                  alt={`Image of ${friend.name}`}
-                  width={40}
-                  height={40}
-                  className='m-2 inline rounded-full'
-                />
-                <div className='flex flex-col justify-center'>
-                  <span className='font-bold'>{friend.name}</span>
+                  onClick={() => handleFriendClick(friend.$id)}
+                >
+                  <Image
+                    src={friend.avatar_url}
+                    alt={`Image of ${friend.name}`}
+                    width={40}
+                    height={40}
+                    className='m-2 inline rounded-full'
+                  />
+                  <div className='flex flex-col justify-center'>
+                    <span className='font-bold'>{friend.name}</span>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))
             : null}
         </div>
       </div>

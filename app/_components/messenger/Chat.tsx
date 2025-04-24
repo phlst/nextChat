@@ -2,6 +2,7 @@
 import { useSearchParams } from 'next/navigation';
 import { ChatMessages } from './ChatMessages';
 import AddFriend from './AddFriend';
+import { Suspense } from 'react';
 
 function Chat() {
   const searchParams = useSearchParams();
@@ -15,7 +16,9 @@ function Chat() {
       {searchAdd !== null ? (
         <AddFriend add={searchAdd} />
       ) : searchChat !== null ? (
-        <ChatMessages />
+        <Suspense fallback='loading...'>
+          <ChatMessages />
+        </Suspense>
       ) : (
         <h1>Start chat with someone</h1>
       )}

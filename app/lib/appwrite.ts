@@ -2,27 +2,51 @@
 
 import { Account, Client, Databases, ID, Query } from 'node-appwrite';
 import { cookies } from 'next/headers';
-
 import { redirect } from 'next/navigation';
 
+const client = new Client()
+  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+  .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
+
+const databases = new Databases(client);
+
 export async function createSessionClient() {
-  const client = new Client()
+  const sessionClient = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
+
   const cookieStore = await cookies();
   const session = cookieStore.get('session');
+
   if (!session || !session.value) {
     throw new Error('No session');
   }
 
-  client.setSession(session.value);
+  sessionClient.setSession(session.value);
 
   return {
     get account() {
-      return new Account(client);
+      return new Account(sessionClient);
     },
   };
 }
+
+export async function createAdminClient() {
+  const adminClient = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT)
+    .setKey(process.env.NEXT_APPWRITE_KEY);
+
+  return {
+    get account() {
+      return new Account(adminClient);
+    },
+    get database() {
+      return new Databases(adminClient);
+    },
+  };
+}
+
 export async function sendFriendRequest({
   sender,
   receiver,
@@ -30,11 +54,6 @@ export async function sendFriendRequest({
   sender: string;
   receiver: string;
 }): Promise<boolean> {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
-  const databases = new Databases(client);
-
   try {
     await databases.createDocument('messenger', 'friend_request', ID.unique(), {
       sender_id: sender,
@@ -48,55 +67,92 @@ export async function sendFriendRequest({
   }
 }
 
+export async function generateHexChatId(
+  userId1: string,
+  userId2: string,
+): Promise<string> {
+  const [a, b] = [userId1, userId2].sort();
+  const raw = `${a}:${b}`;
+  const encoder = new TextEncoder();
+  const data = encoder.encode(raw);
 
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+  return hashHex.slice(0, 35); // trim to 35 characters
+}
 export async function acceptRequest(id: string) {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
-
-  const databases = new Databases(client);
-
   const requestData = await getRequestData(id);
   const sender = (await getUserById(requestData.sender_id)).friends;
   const receiver = (await getUserById(requestData.receiver_id)).friends;
 
+  const chatId = await generateHexChatId(
+    requestData.sender_id,
+    requestData.receiver_id,
+  );
   const friendsSender = [...sender, requestData.receiver_id];
   const friendsReceiver = [...receiver, requestData.sender_id];
   try {
-    await databases.updateDocument('messenger', 'users', requestData.receiver_id, {
-      friends: friendsReceiver,
-    });
+    await databases.updateDocument(
+      'messenger',
+      'users',
+      requestData.receiver_id,
+      {
+        friends: friendsReceiver,
+      },
+    );
 
-    await databases.updateDocument('messenger', 'users', requestData.sender_id, {
-      friends: friendsSender,
+    await databases.updateDocument(
+      'messenger',
+      'users',
+      requestData.sender_id,
+      {
+        friends: friendsSender,
+      },
+    );
+    await databases.createDocument('messenger', 'chat', chatId, {
+      friends: [requestData.sender_id, requestData.receiver_id],
     });
-    await databases.deleteDocument('messenger', 'friend_request', requestData.$id)
+    await databases.deleteDocument(
+      'messenger',
+      'friend_request',
+      requestData.$id,
+    );
     return true;
   } catch (error) {
     console.log(error);
     return false;
   }
-} export async function removeRequest(id: string) {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
-  const databases = new Databases(client);
-  try {
+}
 
-    databases.deleteDocument('messenger', 'friend_request', id)
-    return true
+export async function removeRequest(id: string) {
+  try {
+    databases.deleteDocument('messenger', 'friend_request', id);
+    return true;
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return false;
   }
 }
+export async function getMessagesChat(value: string[]) {
+  if (value.length === 0) {
+    return;
+  }
+  const messages = await databases.listDocuments('messenger', 'messages', [
+    Query.equal('sender_id', value),
+  ]);
+  const withType: Message[] = messages.documents.map((doc) => ({
+    senderId: doc.sender_id,
+    message: doc.message,
+    timeSend: doc.$createdAt,
+  }));
+  return withType;
+}
 
 export async function getRequestData(id: string) {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
-  const databases = new Databases(client);
-  const result = await databases.getDocument('messenger', 'friend_request', id)
+  const result = await databases.getDocument('messenger', 'friend_request', id);
   const filtered: FriendRequest = {
     sender_id: result.sender_id,
     receiver_id: result.receiver_id,
@@ -104,11 +160,8 @@ export async function getRequestData(id: string) {
   };
   return filtered;
 }
+
 export async function getRequest(id: string) {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
-  const databases = new Databases(client);
   const result = await databases.listDocuments('messenger', 'friend_request', [
     Query.equal('receiver_id', id),
   ]);
@@ -120,11 +173,8 @@ export async function getRequest(id: string) {
   }));
   return filtered;
 }
+
 export async function requestData(friends: string[], id: string[]) {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
-  const databases = new Databases(client);
   if (friends.length == 0) {
     return;
   }
@@ -136,15 +186,12 @@ export async function requestData(friends: string[], id: string[]) {
     $id: doc.$id,
     name: doc.name,
     avatar_url: doc.avatar_url,
-    requestId: id[i]
+    requestId: id[i],
   }));
   return data;
 }
+
 export async function getMyFriends(friends: string[]) {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
-  const databases = new Databases(client);
   if (friends.length == 0) {
     return;
   }
@@ -159,14 +206,19 @@ export async function getMyFriends(friends: string[]) {
   }));
   return data;
 }
+
+export async function findChat(id: string) {
+  const data = await databases.getDocument('messenger', 'chat', id);
+  const chat: Chat = {
+    friends: data.friends,
+    messages: data.messages,
+    $id: data.$id,
+  };
+  return chat;
+}
 export async function findUsers(value: string) {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
-  const databases = new Databases(client);
   const users = await databases.listDocuments('messenger', 'users', [
     Query.contains('name', value),
-
     Query.select(['$id', 'name', 'avatar_url']),
   ]);
 
@@ -177,11 +229,8 @@ export async function findUsers(value: string) {
   }));
   return data;
 }
+
 export async function getUserById(userId: string) {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
-  const databases = new Databases(client);
   const document = await databases.getDocument('messenger', 'users', userId);
 
   const data: User = {
@@ -193,18 +242,20 @@ export async function getUserById(userId: string) {
   };
   return data;
 }
+
 export async function getSessionUser() {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT);
   const cookieStore = await cookies();
   const session = cookieStore.get('session');
   if (!session || !session.value) {
     throw new Error('No session');
   }
 
-  client.setSession(session.value);
-  const account = new Account(client);
+  const sessionClient = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT)
+    .setSession(session.value);
+
+  const account = new Account(sessionClient);
 
   try {
     const user = await account.get();
@@ -213,22 +264,6 @@ export async function getSessionUser() {
     console.error('Error fetching account:', error);
     throw error;
   }
-}
-
-export async function createAdminClient() {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT)
-    .setKey(process.env.NEXT_APPWRITE_KEY);
-
-  return {
-    get account() {
-      return new Account(client);
-    },
-    get database() {
-      return new Databases(client);
-    },
-  };
 }
 
 export async function getLoggedInUser() {

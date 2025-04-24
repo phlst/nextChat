@@ -1,176 +1,27 @@
-const myId = 8765432;
+import { findChat, getMessagesChat } from '@/app/lib/appwrite';
+import { RootState } from '@/app/lib/store';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
-const fakeChat = {
-  friendId: [9876543, 8765432],
-  messages: [
-    {
-      sender: 9876543,
-      message: 'Hey, how are you doing today?',
-      timeSend: 1712950793, // 2024-04-13 16:33:13 UTC
-    },
-    {
-      sender: 8765432,
-      message: "I'm good! Just finished that project we talked about.",
-      timeSend: 1712950893, // 2024-04-13 16:34:53 UTC
-    },
-    {
-      sender: 9876543,
-      message: "That's great! Can you send me the details?",
-      timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 9876543,
-      message: 'Hey, how are you doing today?',
-      timeSend: 1712950793, // 2024-04-13 16:33:13 UTC
-    },
-    {
-      sender: 8765432,
-      message: "I'm good! Just finished that project we talked about.",
-      timeSend: 1712950893, // 2024-04-13 16:34:53 UTC
-    },
-    {
-      sender: 9876543,
-      message: "That's great! Can you send me the details?",
-      timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email .",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 9876543,
-      message: 'Hey, how are you doing today?',
-      timeSend: 1712950793, // 2024-04-13 16:33:13 UTC
-    },
-    {
-      sender: 8765432,
-      message: "I'm good! Just finished that project we talked about.",
-      timeSend: 1712950893, // 2024-04-13 16:34:53 UTC
-    },
-    {
-      sender: 9876543,
-      message: "That's great! Can you send me the details?",
-      timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 9876543,
-      message: 'Hey, how are you doing today?',
-      timeSend: 1712950793, // 2024-04-13 16:33:13 UTC
-    },
-    {
-      sender: 8765432,
-      message: "I'm good! Just finished that project we talked about.",
-      timeSend: 1712950893, // 2024-04-13 16:34:53 UTC
-    },
-    {
-      sender: 9876543,
-      message: "That's great! Can you send me the details?",
-      timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 9876543,
-      message: 'Hey, how are you doing today?',
-      timeSend: 1712950793, // 2024-04-13 16:33:13 UTC
-    },
-    {
-      sender: 8765432,
-      message: "I'm good! Just finished that project we talked about.",
-      timeSend: 1712950893, // 2024-04-13 16:34:53 UTC
-    },
-    {
-      sender: 9876543,
-      message: "That's great! Can you send me the details?",
-      timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
-    },
-    {
-      sender: 9876543,
-      message: "That's great! Can you send me the details?",
-      timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
-    },
-    {
-      sender: 9876543,
-      message: "That's great! Can you send me the details?",
-      timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
-    },
-    {
-      sender: 9876543,
-      message: "That's great! Can you send me th?",
-      timeSend: 1712951023, // 2024-04-13 16:37:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-    {
-      sender: 8765432,
-      message: "Sure, I'll email you the documentation later today.",
-      timeSend: 1712951143, // 2024-04-13 16:39:03 UTC
-    },
-  ],
-};
 export function ChatMessages() {
+  const searchParams = useSearchParams();
+  const myId = useSelector((state: RootState) => state.user.$id);
+  const chatId = searchParams.get('chat');
+  const [chatMessages, setChatMessages] = useState<Message[]>();
+  useEffect(() => {
+    async function getChatData() {
+      if (chatId === null) {
+        return false;
+      } else {
+        const chat = await findChat(chatId);
+        const messages = await getMessagesChat(chat.messages);
+        setChatMessages(messages);
+      }
+    }
+    getChatData();
+  }, [chatId]);
+
   return (
     <>
       <div className='text-custom-green fixed z-20 rounded-2xl bg-zinc-900 p-2 font-bold'>
@@ -183,48 +34,54 @@ export function ChatMessages() {
           type='text'
         />
         <div className='scrollbar scrollbar-thumb-custom-black scrollbar-track-custom-gray flex h-full w-full flex-col-reverse overflow-y-scroll'>
-          {fakeChat.messages.map((message, i) => {
-            const prevSender = fakeChat.messages[i - 1]?.sender;
-            const nextSender = fakeChat.messages[i + 1]?.sender;
-            const isMine = message.sender === myId;
+          {chatMessages !== undefined
+            ? chatMessages.map((message, i) => {
+                const prevSender = chatMessages[i - 1]?.senderId;
+                const nextSender = chatMessages[i + 1]?.senderId;
+                const isMine = message.senderId === myId;
 
-            const baseClasses = `
+                const baseClasses = `
     ${isMine ? 'bg-custom-green self-end rounded-tl-2xl rounded-bl-2xl' : 'bg-zinc-700/20 self-start rounded-tr-2xl rounded-br-2xl'}
     p-2 text-white
     
   `;
 
-            let topRadius = '';
-            let bottomRadius = '';
-            let middle = '';
+                let topRadius = '';
+                let bottomRadius = '';
+                let middle = '';
 
-            if (isMine) {
-              topRadius = prevSender !== message.sender ? 'rounded-br-2xl' : '';
-              bottomRadius =
-                nextSender !== message.sender ? 'rounded-tr-2xl' : '';
-              middle =
-                prevSender === message.sender && nextSender === message.sender
-                  ? 'rounded-r-sm'
-                  : '';
-            } else {
-              topRadius = prevSender !== message.sender ? 'rounded-bl-2xl' : '';
-              bottomRadius =
-                nextSender !== message.sender ? 'rounded-tl-2xl' : '';
-              middle =
-                prevSender === message.sender && nextSender === message.sender
-                  ? 'rounded-l-sm'
-                  : '';
-            }
+                if (isMine) {
+                  topRadius =
+                    prevSender !== message.senderId ? 'rounded-br-2xl' : '';
+                  bottomRadius =
+                    nextSender !== message.senderId ? 'rounded-tr-2xl' : '';
+                  middle =
+                    prevSender === message.senderId &&
+                    nextSender === message.senderId
+                      ? 'rounded-r-sm'
+                      : '';
+                } else {
+                  topRadius =
+                    prevSender !== message.senderId ? 'rounded-bl-2xl' : '';
+                  bottomRadius =
+                    nextSender !== message.senderId ? 'rounded-tl-2xl' : '';
+                  middle =
+                    prevSender === message.senderId &&
+                    nextSender === message.senderId
+                      ? 'rounded-l-sm'
+                      : null;
+                }
 
-            return (
-              <div
-                key={i + message.message}
-                className={`${baseClasses} ${topRadius} ${bottomRadius} ${middle} m-[1px]`}
-              >
-                {message.message}
-              </div>
-            );
-          })}
+                return (
+                  <div
+                    key={i + message.message}
+                    className={`${baseClasses} ${topRadius} ${bottomRadius} ${middle} m-[1px]`}
+                  >
+                    {message.message}
+                  </div>
+                );
+              })
+            : null}
         </div>
       </div>
     </>
