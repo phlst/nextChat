@@ -18,7 +18,6 @@ export default function Home() {
       await logInWithEmail(formData);
     } catch (error) {
       console.error('Error signing up:', error);
-      alert(error instanceof Error ? error.message : 'Failed to sign up');
     }
   };
   return (

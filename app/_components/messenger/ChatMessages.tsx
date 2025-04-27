@@ -1,7 +1,7 @@
-import { findChat, getMessagesChat } from '@/app/lib/appwrite';
+import { getMessagesChat, sendMessage } from '@/app/lib/appwrite';
 import { RootState } from '@/app/lib/store';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 export function ChatMessages() {
@@ -9,18 +9,32 @@ export function ChatMessages() {
   const myId = useSelector((state: RootState) => state.user.$id);
   const chatId = searchParams.get('chat');
   const [chatMessages, setChatMessages] = useState<Message[]>();
+  const [messageInput, setMessageInput] = useState<string>('');
+
   useEffect(() => {
     async function getChatData() {
       if (chatId === null) {
         return false;
       } else {
-        const chat = await findChat(chatId);
-        const messages = await getMessagesChat(chat.messages);
+        const messages = await getMessagesChat(chatId);
         setChatMessages(messages);
       }
     }
     getChatData();
   }, [chatId]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (chatId === null || messageInput.trim() === '') {
+      return;
+    }
+    try {
+      await sendMessage(messageInput, chatId, myId);
+      setMessageInput('');
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <>
@@ -28,11 +42,15 @@ export function ChatMessages() {
         Chat with Jozko Pobehly
       </div>
       <div className='flex h-full w-full flex-col-reverse'>
-        <input
-          className='bg-custom-black mt-5 w-full rounded-2xl p-2 text-white'
-          placeholder='Aa'
-          type='text'
-        />
+        <form onSubmit={handleSubmit}>
+          <input
+            className='bg-custom-black mt-5 w-full rounded-2xl p-2 text-white'
+            placeholder='Aa'
+            type='text'
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)} // Update state on change
+          />
+        </form>
         <div className='scrollbar scrollbar-thumb-custom-black scrollbar-track-custom-gray flex h-full w-full flex-col-reverse overflow-y-scroll'>
           {chatMessages !== undefined
             ? chatMessages.map((message, i) => {
@@ -41,10 +59,12 @@ export function ChatMessages() {
                 const isMine = message.senderId === myId;
 
                 const baseClasses = `
-    ${isMine ? 'bg-custom-green self-end rounded-tl-2xl rounded-bl-2xl' : 'bg-zinc-700/20 self-start rounded-tr-2xl rounded-br-2xl'}
-    p-2 text-white
-    
-  `;
+                  ${
+                    isMine
+                      ? 'bg-custom-green self-end rounded-tl-2xl rounded-bl-2xl'
+                      : 'bg-zinc-700/20 self-start rounded-tr-2xl rounded-br-2xl'
+                  }
+                  p-2 text-white`;
 
                 let topRadius = '';
                 let bottomRadius = '';
@@ -69,7 +89,7 @@ export function ChatMessages() {
                     prevSender === message.senderId &&
                     nextSender === message.senderId
                       ? 'rounded-l-sm'
-                      : null;
+                      : '';
                 }
 
                 return (

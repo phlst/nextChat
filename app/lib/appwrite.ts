@@ -67,6 +67,23 @@ export async function sendFriendRequest({
   }
 }
 
+export async function sendMessage(
+  value: string,
+  chatId: string,
+  senderId: string,
+) {
+  try {
+    await databases.createDocument('messenger', 'messages', ID.unique(), {
+      chat_id: chatId,
+      message: value,
+      sender_id: senderId,
+    });
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
 export async function generateHexChatId(
   userId1: string,
   userId2: string,
@@ -136,12 +153,9 @@ export async function removeRequest(id: string) {
     return false;
   }
 }
-export async function getMessagesChat(value: string[]) {
-  if (value.length === 0) {
-    return;
-  }
+export async function getMessagesChat(value: string) {
   const messages = await databases.listDocuments('messenger', 'messages', [
-    Query.equal('sender_id', value),
+    Query.equal('chat_id', value),
   ]);
   const withType: Message[] = messages.documents.map((doc) => ({
     senderId: doc.sender_id,
@@ -207,15 +221,6 @@ export async function getMyFriends(friends: string[]) {
   return data;
 }
 
-export async function findChat(id: string) {
-  const data = await databases.getDocument('messenger', 'chat', id);
-  const chat: Chat = {
-    friends: data.friends,
-    messages: data.messages,
-    $id: data.$id,
-  };
-  return chat;
-}
 export async function findUsers(value: string) {
   const users = await databases.listDocuments('messenger', 'users', [
     Query.contains('name', value),
