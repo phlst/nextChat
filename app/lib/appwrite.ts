@@ -47,6 +47,9 @@ export async function createAdminClient() {
   };
 }
 
+export async function addMessage(text: string, id: string) {
+
+}
 export async function sendFriendRequest({
   sender,
   receiver,

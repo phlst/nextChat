@@ -19,6 +19,7 @@ export default function Home() {
     } catch (error) {
       console.error('Error signing up:', error);
     }
+
   };
   return (
     <div className='flex h-screen w-screen items-center justify-center'>
