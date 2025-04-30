@@ -1,7 +1,6 @@
 import { findChat, getMessage, getMessagesChat, sendMessage } from '@/app/lib/appwrite';
 import { subscribeClient } from '@/app/lib/appwriteClient';
 import { RootState } from '@/app/lib/store';
-import { RealtimeResponseEvent } from 'appwrite';
 import { useSearchParams } from 'next/navigation';
 import { FormEvent, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
