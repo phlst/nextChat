@@ -1,4 +1,5 @@
-import { getMessagesChat, sendMessage } from '@/app/lib/appwrite';
+import { findChat, getMessagesChat, sendMessage } from '@/app/lib/appwrite';
+import { subscribeClient } from '@/app/lib/appwriteClient';
 import { RootState } from '@/app/lib/store';
 import { useSearchParams } from 'next/navigation';
 import { FormEvent, useEffect, useState } from 'react';
@@ -10,26 +11,56 @@ export function ChatMessages() {
   const chatId = searchParams.get('chat');
   const [chatMessages, setChatMessages] = useState<Message[]>();
   const [messageInput, setMessageInput] = useState<string>('');
+  const [chat, setChat] = useState<Chat>()
+
 
   useEffect(() => {
     async function getChatData() {
-      if (chatId === null) {
-        return false;
-      } else {
-        const messages = await getMessagesChat(chatId);
-        setChatMessages(messages);
+      if (!chatId) return;
+
+      try {
+        const chat = await findChat(chatId);
+        setChat(chat);
+        const messages = await getMessagesChat(chat.$id);
+        const sortedMessages = messages?.sort((a: Message, b: Message) => {
+          const dateA = new Date(a.timeSend).getTime();
+          const dateB = new Date(b.timeSend).getTime();
+          return dateB - dateA;
+        });
+        setChatMessages(sortedMessages || []);
+      } catch (error) {
+        console.error('Error fetching chat data:', error);
       }
     }
+
+    function subscribe() {
+      const unsubscribe = subscribeClient.subscribe(
+        `databases.messenger.collections.chat.documents.${chatId}`,
+        async (response) => {
+          console.log(response)
+        }
+
+      );
+
+      return unsubscribe;
+    }
+
+    const unsubscribe = subscribe();
     getChatData();
+
+    return () => {
+      unsubscribe();
+    };
   }, [chatId]);
+
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (chatId === null || messageInput.trim() === '') {
+    if (chatId === null || messageInput.trim() === '' || chat?.messages === undefined) {
       return;
     }
     try {
-      await sendMessage(messageInput, chatId, myId);
+      await sendMessage(messageInput, chatId, myId, chat?.messages);
       setMessageInput('');
     } catch (error) {
       console.log(error);
@@ -54,53 +85,52 @@ export function ChatMessages() {
         <div className='scrollbar scrollbar-thumb-custom-black scrollbar-track-custom-gray flex h-full w-full flex-col-reverse overflow-y-scroll'>
           {chatMessages !== undefined
             ? chatMessages.map((message, i) => {
-                const prevSender = chatMessages[i - 1]?.senderId;
-                const nextSender = chatMessages[i + 1]?.senderId;
-                const isMine = message.senderId === myId;
+              const prevSender = chatMessages[i - 1]?.senderId;
+              const nextSender = chatMessages[i + 1]?.senderId;
+              const isMine = message.senderId === myId;
 
-                const baseClasses = `
-                  ${
-                    isMine
-                      ? 'bg-custom-green self-end rounded-tl-2xl rounded-bl-2xl'
-                      : 'bg-zinc-700/20 self-start rounded-tr-2xl rounded-br-2xl'
-                  }
+              const baseClasses = `
+                  ${isMine
+                  ? 'bg-custom-green self-end rounded-tl-2xl rounded-bl-2xl'
+                  : 'bg-zinc-700/20 self-start rounded-tr-2xl rounded-br-2xl'
+                }
                   p-2 text-white`;
 
-                let topRadius = '';
-                let bottomRadius = '';
-                let middle = '';
+              let topRadius = '';
+              let bottomRadius = '';
+              let middle = '';
 
-                if (isMine) {
-                  topRadius =
-                    prevSender !== message.senderId ? 'rounded-br-2xl' : '';
-                  bottomRadius =
-                    nextSender !== message.senderId ? 'rounded-tr-2xl' : '';
-                  middle =
-                    prevSender === message.senderId &&
+              if (isMine) {
+                topRadius =
+                  prevSender !== message.senderId ? 'rounded-br-2xl' : '';
+                bottomRadius =
+                  nextSender !== message.senderId ? 'rounded-tr-2xl' : '';
+                middle =
+                  prevSender === message.senderId &&
                     nextSender === message.senderId
-                      ? 'rounded-r-sm'
-                      : '';
-                } else {
-                  topRadius =
-                    prevSender !== message.senderId ? 'rounded-bl-2xl' : '';
-                  bottomRadius =
-                    nextSender !== message.senderId ? 'rounded-tl-2xl' : '';
-                  middle =
-                    prevSender === message.senderId &&
+                    ? 'rounded-r-sm'
+                    : '';
+              } else {
+                topRadius =
+                  prevSender !== message.senderId ? 'rounded-bl-2xl' : '';
+                bottomRadius =
+                  nextSender !== message.senderId ? 'rounded-tl-2xl' : '';
+                middle =
+                  prevSender === message.senderId &&
                     nextSender === message.senderId
-                      ? 'rounded-l-sm'
-                      : '';
-                }
+                    ? 'rounded-l-sm'
+                    : '';
+              }
 
-                return (
-                  <div
-                    key={i + message.message}
-                    className={`${baseClasses} ${topRadius} ${bottomRadius} ${middle} m-[1px]`}
-                  >
-                    {message.message}
-                  </div>
-                );
-              })
+              return (
+                <div
+                  key={i + message.message}
+                  className={`${baseClasses} ${topRadius} ${bottomRadius} ${middle} m-[1px]`}
+                >
+                  {message.message}
+                </div>
+              );
+            })
             : null}
         </div>
       </div>

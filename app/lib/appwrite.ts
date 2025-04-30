@@ -47,9 +47,6 @@ export async function createAdminClient() {
   };
 }
 
-export async function addMessage(text: string, id: string) {
-
-}
 export async function sendFriendRequest({
   sender,
   receiver,
@@ -74,6 +71,7 @@ export async function sendMessage(
   value: string,
   chatId: string,
   senderId: string,
+  messages: string[],
 ) {
   try {
     await databases.createDocument('messenger', 'messages', ID.unique(), {
@@ -81,6 +79,7 @@ export async function sendMessage(
       message: value,
       sender_id: senderId,
     });
+    await databases.updateDocument('messenger', 'chat', chatId, { messages: messages })
     return true;
   } catch (error) {
     console.log(error);
@@ -208,6 +207,15 @@ export async function requestData(friends: string[], id: string[]) {
   return data;
 }
 
+export async function findChat(id: string) {
+  const data = await databases.getDocument('messenger', 'chat', id)
+  const result: Chat = {
+    messages: data.messages,
+    friends: data.friends,
+    $id: data.$id,
+  }
+  return result;
+}
 export async function getMyFriends(friends: string[]) {
   if (friends.length == 0) {
     return;
