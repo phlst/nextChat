@@ -157,6 +157,16 @@ export async function removeRequest(id: string) {
     return false;
   }
 }
+export async function getMessage(value: string) {
+  const doc = await databases.getDocument('messenger', 'messages', value)
+  const withType: Message = {
+
+    senderId: doc.sender_id,
+    message: doc.message,
+    timeSend: doc.$createdAt,
+  }
+  return withType;
+}
 export async function getMessagesChat(value: string) {
   const messages = await databases.listDocuments('messenger', 'messages', [
     Query.equal('chat_id', value),
