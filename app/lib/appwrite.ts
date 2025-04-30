@@ -73,12 +73,14 @@ export async function sendMessage(
   senderId: string,
   messages: string[],
 ) {
+  const messageID = ID.unique()
   try {
-    await databases.createDocument('messenger', 'messages', ID.unique(), {
+    await databases.createDocument('messenger', 'messages', messageID, {
       chat_id: chatId,
       message: value,
       sender_id: senderId,
     });
+    messages.push(messageID)
     await databases.updateDocument('messenger', 'chat', chatId, { messages: messages })
     return true;
   } catch (error) {

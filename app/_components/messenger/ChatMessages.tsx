@@ -37,7 +37,7 @@ export function ChatMessages() {
       const unsubscribe = subscribeClient.subscribe(
         `databases.messenger.collections.chat.documents.${chatId}`,
         async (response) => {
-          console.log(response)
+          console.log(response.payload)
         }
 
       );
